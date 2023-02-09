@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+// import axios from 'axios';
 import phonebookService from './phonebookService';
 
 import Alert from './components/Alert';
@@ -90,7 +90,6 @@ const App = () => {
     let found = false;
     persons.forEach((person) => {
       if (person.name === newName) {
-        // alert(`${newName} is already added to phoneboook`);
         found = true;
         if (
           window.confirm(
@@ -115,16 +114,20 @@ const App = () => {
               setNewNumber('');
             })
             .catch((err) => {
-              alert(
-                'red',
-                `Information of ${person.name} has already been removed from server`
-              );
-              setPersons(
-                persons.filter((_person) => person.name !== _person.name)
-              );
-              setNewName('');
-              setNewNumber('');
-              console.log(err.message);
+              console.log(err);
+              if (err.response.status === 500) {
+                alert(
+                  'red',
+                  `Information of ${person.name} has already been removed from server`
+                );
+                setPersons(
+                  persons.filter((_person) => person.name !== _person.name)
+                );
+                setNewName('');
+                setNewNumber('');
+              } else {
+                alert('red', err.response.data.error);
+              }
             });
         }
       }
@@ -136,20 +139,29 @@ const App = () => {
         name: newName,
         number: newNumber,
       })
-      .then(() =>
-        phonebookService.getPersons().then((data) => setPersons(data))
-      );
-
-    alert('green', `Added ${newName}`);
-    setNewName('');
-    setNewNumber('');
+      .then((res) => {
+        console.log(res);
+        phonebookService.getPersons().then((data) => {
+          setPersons(data);
+          alert('green', `Added ${newName}`);
+          setNewName('');
+          setNewNumber('');
+        });
+      })
+      .catch((err) => {
+        const { response } = err;
+        alert('red', response.data.error);
+      });
   };
 
   const removeEntry = (id, name) => {
     if (window.confirm(`Delete ${name} ?`)) {
       setPersons(persons.filter((person) => person.id !== id));
       alert('red', `Deleted ${name}`);
-      phonebookService.removePerson(id);
+      phonebookService.removePerson(id).catch((err) => {
+        const { response } = err;
+        alert('red', response.data.error);
+      });
     }
   };
 

@@ -1,15 +1,21 @@
 import axios from 'axios';
 
-const getPersons = () =>
-  axios('http://localhost:3001/persons').then((res) => res.data);
+const baseUrl = 'api/persons';
 
-const addPerson = (person) =>
-  axios.post('http://localhost:3001/persons', person);
+const getPersons = () => axios.get(baseUrl).then((res) => res.data);
 
-const removePerson = (id) =>
-  axios.delete(`http://localhost:3001/persons/${id}`);
+const addPerson = (person) => axios.post(baseUrl, person);
+
+const removePerson = (id) => axios.delete(`${baseUrl}/${id}`);
 
 const updatePerson = (id, newPerson) =>
-  axios.put(`http://localhost:3001/persons/${id}`, newPerson);
+  axios.put(`${baseUrl}/${id}`, newPerson);
 
-export default { getPersons, addPerson, removePerson, updatePerson };
+const exportObject = {
+  getPersons,
+  addPerson,
+  removePerson,
+  updatePerson,
+};
+
+export default exportObject;
